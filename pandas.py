@@ -1,6 +1,7 @@
 ##### LEGEND #####
 
 #!# Methods/Functions that are worth using later
+##!# To revise
 
 ##### Related documentation #####
 import webbrowser
@@ -92,5 +93,96 @@ df1.loc[dates[1]:dates[3], 'E'] = 1
 
 clear_df = df1.dropna(how='any') #!# Drop them
 clear_df2 = df1.fillna(value=5) #!# Fill with one value
-
 pd.isna(df1) #!# Check missing values 
+
+##### Basic operations #####
+
+df.mean() #!# for columns
+df.mean(1) #!# for rows
+s = pd.Series([1, 3, 5, np.nan, 6, 8], index=dates).shift(2) #!# shift for moving series by two positions
+df.sub(s, axis='index') ##!#
+
+##### Apply functions #####
+
+df.apply(np.cumsum)
+df.apply(lambda x: x.max() - x.min()) ##!# check how to apply functions for indexes instead of columns
+
+##### Histogramming #####
+s.value_counts()
+
+##### Merging #####
+
+df = pd.DataFrame(np.random.randn(10, 4))
+pieces = [df[:3], df[3:7], df[7:]]
+pd.concat(pieces)
+df == pd.concat(pieces) #!# Check that slicing and concating gives equal results
+
+#### Joins #####
+
+left = pd.DataFrame({'key': ['foo', 'foo'], 'lval': [1, 2]})
+right = pd.DataFrame({'key': ['foo', 'foo'], 'rval': [4, 5]})
+pd.merge(left, right, on='key') #!# All possible combinations
+
+left = pd.DataFrame({'key': ['foo', 'bar'], 'lval': [1, 2]})
+right = pd.DataFrame({'key': ['foo', 'bar'], 'rval': [4, 5]})
+pd.merge(left, right, on='key') #!# Like INNER JOIN
+
+#### Appending data #####
+s = df.iloc[3]
+df.append(s, ignore_index=True) ### If False Then Index = 3 Else 10
+
+
+##### Groupping #####
+
+df = pd.DataFrame({'A': ['foo', 'bar', 'foo', 'bar',
+                         'foo', 'bar', 'foo', 'foo'],
+                   'B': ['one', 'one', 'two', 'three',
+                         'two', 'two', 'one', 'three'],
+                   'C': np.random.randn(8),
+                   'D': np.random.randn(8)})
+
+df.groupby('A').sum() #!# Groupping by one column 
+df.groupby(['A', 'B']).sum() #!# Groupping by more columns
+
+##### Stacking #####
+
+tuples = list(zip(*[['bar', 'bar', 'baz', 'baz',
+                     'foo', 'foo', 'qux', 'qux'],
+                    ['one', 'two', 'one', 'two',
+                     'one', 'two', 'one', 'two']])) # List with 8 two-dimensional tuples
+                                                    # 1st element from 1st list with 1st element from 2nd list
+
+index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second']) ##!# Check what this function does
+
+df5 = pd.DataFrame(np.random.randn(8, 2), 
+                   index=index, 
+                   columns=['A', 'B']) #!# Multi-dimensional index
+
+stacked = df5.stack()
+other = pd.DataFrame({'angles': [0, 3, 4, 5]},
+                     index=['circle', 'triangle', 'rectangle', 'square'])
+
+##### Unstack - reverse operation #####
+stacked.unstack()
+stacked.unstack(0)
+stacked.unstack(1)
+
+
+##### Pivot tables #####
+
+df = pd.DataFrame({'A': ['one', 'one', 'two', 'three'] * 3,
+                   'B': ['A', 'B', 'C'] * 4,
+                   'C': ['foo', 'foo', 'foo', 'bar', 'bar', 'bar'] * 2,
+                   'D': np.random.randn(12),
+                   'E': np.random.randn(12)})
+
+pd.pivot_table(df, values='D', index=['A', 'B'], columns=['C'])
+
+##!# Continue from point 108
+
+##### Multiply DataFrames #####
+
+df * other #!# a new dataset with combination of all indexes and column is created
+df6 = other
+df6.mul(other, fill_value=0) #!# all NULLs are replaced with 0s
+
